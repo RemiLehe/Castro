@@ -76,7 +76,12 @@ Castro::construct_new_ext_source(MultiFab& source, MultiFab& state_old, MultiFab
         mult_factor = -0.5;
     }
 
-    fill_ext_source(old_time, dt, state_old, state_old, ext_src);
+    {
+      FillPatchIterator fpi(*this, state_old, 1, time, State_Type, 0, NUM_STATE);
+      MultiFab& grown_state = fpi.get_mf();
+      amrex::Print() << "state_old: grown_state " << grown_state.nGrow() << std::endl;
+      fill_ext_source(old_time, dt, state_old, grown_state, ext_src);
+    }
 
     MultiFab::Saxpy(source, mult_factor, ext_src, 0, 0, source.nComp(), 0);  // NOLINT(readability-suspicious-call-argument)
 
@@ -90,7 +95,13 @@ Castro::construct_new_ext_source(MultiFab& source, MultiFab& state_old, MultiFab
         mult_factor = 0.5;
     }
 
-    fill_ext_source(time, dt, state_old, state_new, ext_src);
+    //state_new needs ghost cell
+    {
+      FillPatchIterator fpi(*this, state_new, 1, time, State_Type, 0, NUM_STATE);
+      MultiFab& grown_state = fpi.get_mf();
+      amrex::Print() << "state_new: grown_state " << grown_state.nGrow() << std::endl;
+      fill_ext_source(time, dt, state_old, grown_state, ext_src);
+    }
 
     MultiFab::Saxpy(source, mult_factor, ext_src, 0, 0, source.nComp(), 0);  // NOLINT(readability-suspicious-call-argument)
 
