@@ -1,0 +1,6 @@
+# name   short name    aion     zion
+  H      H             1.0      0.0
+
+# auxiliary variables
+# Test auxiliary variable: create a variable that mirrors the internal energy
+__aux_myenergy

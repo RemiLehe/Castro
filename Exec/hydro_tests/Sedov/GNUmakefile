@@ -22,11 +22,12 @@ EOS_DIR     := gamma_law
 
 # This sets the network directory in $(MICROPHYSICS_HOME)/networks
 NETWORK_DIR := general_null
-NETWORK_INPUTS = gammalaw.net
+NETWORK_INPUTS = species.net
 
-PROBLEM_DIR ?= ./
+# Activate custom source terms for species
+USE_SPECIES_SOURCES = TRUE
 
-Bpack   := $(PROBLEM_DIR)/Make.package
-Blocs   := $(PROBLEM_DIR)
+Bpack   := ./Make.package
+Blocs   := .
 
 include $(CASTRO_HOME)/Exec/Make.Castro
