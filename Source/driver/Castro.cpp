@@ -3045,11 +3045,21 @@ Castro::reflux (int crse_level, int fine_level, bool in_post_timestep)
 
             if (getLevel(lev).apply_sources()) {
                 bool apply_sources_to_state = true;
+                MultiFab Sborder_old(S_old.boxArray(), S_old.DistributionMap(),
+                                        S_old.nComp(), 1);
+                MultiFab Sborder_new(S_new.boxArray(), S_new.DistributionMap(),
+                                        S_new.nComp(), 1);
+                getLevel(lev).expand_state(Sborder_old,
+                                            getLevel(lev).state[State_Type].prevTime(),
+                                            Sborder_old.nGrow());
+                getLevel(lev).expand_state(Sborder_new,
+                                            getLevel(lev).state[State_Type].curTime(),
+                                            Sborder_new.nGrow());
                 getLevel(lev).do_new_sources(
 #ifdef MHD
                                 Bx_new, By_new, Bz_new,
 #endif
-                                source, S_old, S_new, time, dt_advance_local, apply_sources_to_state);
+                                source, Sborder_old, Sborder_new, time, dt_advance_local, apply_sources_to_state);
             }
 
             if (use_retry && dt_advance_local < dt_amr && getLevel(lev).keep_prev_state) {

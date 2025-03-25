@@ -267,6 +267,10 @@ Castro::do_new_sources (Real time, Real dt)
     advance_status status {};
 
     MultiFab& S_new = get_new_data(State_Type);
+    MultiFab Sborder_new(Sborder.boxArray(), Sborder.DistributionMap(), Sborder.nComp(), Sborder.nGrowVect());
+    expand_state(Sborder_new, time, Sborder_new.nGrow()); // time is the current time
+    // Sborder has the old state data with ghost cells.
+    // Sborder_new has the new state data with ghost cells.
 
     MultiFab& new_source = get_new_data(Source_Type);
 
@@ -280,7 +284,7 @@ Castro::do_new_sources (Real time, Real dt)
 #ifdef MHD
                    Bx_new, By_new, Bz_new,
 #endif
-                   new_source, Sborder, S_new, time, dt);
+                   new_source, Sborder, Sborder_new, time, dt);
 
     return status;
 }
