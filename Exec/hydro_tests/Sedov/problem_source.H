@@ -47,10 +47,24 @@ void problem_source (int i, int j, int k,
     divU += 0.5_rt*(state(i,j,k+1,UMZ)/state(i,j,k+1,URHO) -
                                 state(i,j,k-1,UMZ)/state(i,j,k-1,URHO))/dx[2];
 #endif
-    // Compute pressure
-    Real rho_e = state(i,j,k,UFX);
-    Real p = 2./3 * rho_e;
-    src(i,j,k,UFX) = -p * divU;
+
+    // we now need the pressure -- we will assume that the
+    // temperature is consistent with the input state
+    eos_rep_t eos_state;
+    eos_state.rho = state(i,j,k,URHO);
+    eos_state.e = state(i,j,k,UFX) / state(i,j,k,URHO); // internal energy per unit volume
+    for (int n = 0; n < NumSpec; n++) {
+        eos_state.xn[n] = state(i,j,k,UFS+n)/state(i,j,k,URHO);
+    }
+#if NAUX_NET > 0
+    for (int n = 0; n < NumAux; n++) {
+        eos_state.aux[n] = state(i,j,k,UFX+n)/state(i,j,k,URHO);
+    }
+#endif
+    eos(eos_input_re, eos_state);
+
+    // final source term, -p div{U}
+    src(i,j,k,UFX) = - eos_state.p * divU;
 }
 
 #endif //problem_source_H
